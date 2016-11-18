@@ -28,17 +28,17 @@ def _pipe_cloexec():
 _TASK_ID = None
 
 
-default_signals = {
+default_signals = frozenset({
     signal.SIGTERM,
     signal.SIGINT,
     signal.SIGQUIT,
     signal.SIGALRM,
     signal.SIGUSR1,
     signal.SIGUSR2,
-}
+})
 
 
-def fork(num_processes, max_restarts=100, transmit_signals=default_signals):
+def fork(num_processes, max_restarts=100, pass_signals=default_signals):
     global _TASK_ID
     assert _TASK_ID is None, "Process already forked"
 
@@ -47,19 +47,19 @@ def fork(num_processes, max_restarts=100, transmit_signals=default_signals):
 
     log.info("Starting %d processes", num_processes)
 
-    shutdown = False
+    interrupt = False
     children = {}
 
     def signal_to_children(sig, frame):
-        nonlocal children, shutdown
+        nonlocal children, interrupt
 
         if sig in {signal.SIGTERM, signal.SIGINT, signal.SIGQUIT}:
-            shutdown = True
+            interrupt = True
 
         for pid in children:
             os.kill(pid, sig)
 
-    for sig in transmit_signals:
+    for sig in pass_signals:
         signal.signal(sig, signal_to_children)
 
     def start(number):
@@ -108,7 +108,7 @@ def fork(num_processes, max_restarts=100, transmit_signals=default_signals):
 
         process_id = children.pop(pid)
 
-        if shutdown:
+        if interrupt:
             continue
 
         if os.WIFSIGNALED(status):
