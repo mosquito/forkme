@@ -1,5 +1,6 @@
 import errno
 import os
+import signal
 import sys
 import fcntl
 import logging
@@ -27,7 +28,17 @@ def _pipe_cloexec():
 _TASK_ID = None
 
 
-def fork(num_processes, max_restarts=100):
+default_signals = frozenset({
+    signal.SIGTERM,
+    signal.SIGINT,
+    signal.SIGQUIT,
+    signal.SIGALRM,
+    signal.SIGUSR1,
+    signal.SIGUSR2,
+})
+
+
+def fork(num_processes, max_restarts=100, pass_signals=default_signals):
     global _TASK_ID
     assert _TASK_ID is None, "Process already forked"
 
@@ -36,7 +47,20 @@ def fork(num_processes, max_restarts=100):
 
     log.info("Starting %d processes", num_processes)
 
+    interrupt = False
     children = {}
+
+    def signal_to_children(sig, frame):
+        nonlocal children, interrupt
+
+        if sig in {signal.SIGTERM, signal.SIGINT, signal.SIGQUIT}:
+            interrupt = True
+
+        for pid in children:
+            os.kill(pid, sig)
+
+    for sig in pass_signals:
+        signal.signal(sig, signal_to_children)
 
     def start(number):
         pid = os.fork()
@@ -83,6 +107,9 @@ def fork(num_processes, max_restarts=100):
             continue
 
         process_id = children.pop(pid)
+
+        if interrupt:
+            continue
 
         if os.WIFSIGNALED(status):
             log.warning(
