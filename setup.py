@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='forkme',
-    version='0.4',
+    version='0.5',
     platforms="all",
     author="Dmitry Orlov",
     author_email="me@mosquito.su",
