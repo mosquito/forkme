@@ -1,5 +1,6 @@
 import errno
 import os
+import signal
 import sys
 import fcntl
 import logging
@@ -37,6 +38,20 @@ def fork(num_processes, max_restarts=100):
     log.info("Starting %d processes", num_processes)
 
     children = {}
+
+    def signal_to_children(sig):
+        for pid in children:
+            os.kill(pid, sig)
+
+    signal.signal(
+        signal.SIGTERM, lambda _, __: signal_to_children(signal.SIGTERM)
+    )
+    signal.signal(
+        signal.SIGINT, lambda _, __: signal_to_children(signal.SIGINT)
+    )
+    signal.signal(
+        signal.SIGQUIT, lambda _, __: signal_to_children(signal.SIGQUIT)
+    )
 
     def start(number):
         pid = os.fork()
