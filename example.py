@@ -10,13 +10,13 @@ logging.basicConfig(level=logging.DEBUG)
 def main():
     print("Master proccess has PID: {0}".format(os.getpid()))
     forkme.fork(4)
-    sleep(1)
     print(
-        "Proceess #{id} nas PID: {pid}".format(
+        "Proceess #{id} has PID: {pid}".format(
             id=forkme.get_id(),
             pid=os.getpid()
         )
     )
+    sleep(10)
 
 
 if __name__ == '__main__':
