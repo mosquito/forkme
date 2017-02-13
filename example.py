@@ -16,7 +16,8 @@ def main():
             pid=os.getpid()
         )
     )
-    sleep(10)
+    while True:
+        sleep(1)
 
 
 if __name__ == '__main__':

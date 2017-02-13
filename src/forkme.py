@@ -59,9 +59,6 @@ def fork(num_processes, max_restarts=100, pass_signals=default_signals):
         for pid in children:
             os.kill(pid, sig)
 
-    for sig in pass_signals:
-        signal.signal(sig, signal_to_children)
-
     def start(number):
         pid = os.fork()
 
@@ -84,6 +81,9 @@ def fork(num_processes, max_restarts=100, pass_signals=default_signals):
 
         if process_id is not None:
             return process_id
+
+    for sig in pass_signals:
+        signal.signal(sig, signal_to_children)
 
     num_restarts = 0
 
