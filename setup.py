@@ -3,13 +3,13 @@ from setuptools import setup
 
 setup(
     name='forkme',
-    version='0.7',
+    version='0.8',
     platforms="all",
     author="Dmitry Orlov",
     author_email="me@mosquito.su",
     maintainer="Dmitry Orlov",
     maintainer_email="me@mosquito.su",
-    description="Fork you process like a boss",
+    description="Fork your process like a boss",
     package_dir={'': 'src'},
     packages=[''],
     license="Apache 2",
