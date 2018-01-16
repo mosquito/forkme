@@ -2,7 +2,6 @@ import errno
 import os
 import signal
 import sys
-import fcntl
 import logging
 import multiprocessing
 import random
@@ -11,18 +10,6 @@ from binascii import hexlify
 
 
 log = logging.getLogger(__name__)
-
-
-def _cloexec(fd):
-    flags = fcntl.fcntl(fd, fcntl.F_GETFD)
-    fcntl.fcntl(fd, fcntl.F_SETFD, flags | fcntl.FD_CLOEXEC)
-
-
-def _pipe_cloexec():
-    r, w = os.pipe()
-    _cloexec(r)
-    _cloexec(w)
-    return r, w
 
 
 _TASK_ID = None
