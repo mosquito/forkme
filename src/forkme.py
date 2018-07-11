@@ -25,7 +25,9 @@ default_signals = frozenset({
 })
 
 
-def fork(num_processes, max_restarts=100, pass_signals=default_signals):
+def fork(num_processes, max_restarts=100, pass_signals=default_signals,
+         master_callback=None):
+
     global _TASK_ID
     assert _TASK_ID is None, "Process already forked"
 
@@ -68,6 +70,9 @@ def fork(num_processes, max_restarts=100, pass_signals=default_signals):
 
         if process_id is not None:
             return process_id
+
+    if callable(master_callback):
+        master_callback()
 
     for sig in pass_signals:
         signal.signal(sig, signal_to_children)
